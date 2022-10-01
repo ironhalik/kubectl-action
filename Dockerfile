@@ -32,4 +32,8 @@ RUN apk add --no-cache \
     mv /tmp/kubectl /tmp/helm /tmp/stern /usr/local/bin/ &&\
     rm -rf /tmp/* &&\
     touch "${KUBECONFIG}" &&\
-    chmod 600 "${KUBECONFIG}"
+    chmod 600 "${KUBECONFIG}" &&\
+    mkdir -p /usr/local/bin/docker-entrypoint.d/
+
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
