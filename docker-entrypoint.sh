@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
+export IS_KUBECTL_ACTION_BASE=1
 if [ -n "${INPUT_DEBUG}" ] || [ -n "${RUNNER_DEBUG}" ]; then
     export IS_DEBUG=1
 fi
