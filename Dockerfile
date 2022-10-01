@@ -22,12 +22,12 @@ RUN apk add --no-cache \
     'py3-pip=~22.1' &&\
     pip install --no-cache --disable-pip-version-check --no-input --root-user-action ignore --progress-bar off \
     'awscli>=1.25' &&\
-    wget -q https://storage.googleapis.com/kubernetes-release/release/v${kubectl_version}/bin/linux/amd64/kubectl -O /tmp/kubectl &&\
-    wget -q https://get.helm.sh/helm-v${helm_version}-linux-amd64.tar.gz -O - | tar xzf - -C /tmp/ --strip-components=1 linux-amd64/helm &&\
-    wget -q https://github.com/stern/stern/releases/download/v${stern_version}/stern_${stern_version}_linux_amd64.tar.gz -O - | tar xzf - -C /tmp/  &&\
-    sha256sum /tmp/kubectl | grep -q ${kubectl_checksum} &&\
-    sha256sum /tmp/helm | grep -q ${helm_checksum} &&\
-    sha256sum /tmp/stern | grep -q ${stern_checksum} &&\
+    wget -q "https://storage.googleapis.com/kubernetes-release/release/v${kubectl_version}/bin/linux/amd64/kubectl" -O /tmp/kubectl &&\
+    wget -q "https://get.helm.sh/helm-v${helm_version}-linux-amd64.tar.gz" -O - | tar xzf - -C /tmp/ --strip-components=1 linux-amd64/helm &&\
+    wget -q "https://github.com/stern/stern/releases/download/v${stern_version}/stern_${stern_version}_linux_amd64.tar.gz" -O - | tar xzf - -C /tmp/  &&\
+    sha256sum /tmp/kubectl | grep -q "${kubectl_checksum}" &&\
+    sha256sum /tmp/helm | grep -q "${helm_checksum}" &&\
+    sha256sum /tmp/stern | grep -q "${stern_checksum}" &&\
     chmod +x /tmp/kubectl /tmp/helm /tmp/stern &&\
     mv /tmp/kubectl /tmp/helm /tmp/stern /usr/local/bin/ &&\
     rm -rf /tmp/* &&\
