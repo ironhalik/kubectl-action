@@ -20,6 +20,10 @@ jobs:
       - uses: FranzDiebold/github-env-vars-action@v2
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: ShellCheck
+        uses: ludeeus/action-shellcheck@1.1.0
+        with:
+          ignore: Dockerfile
       - name: Build Docker image
         uses: docker/build-push-action@v3
         with:
