@@ -23,10 +23,11 @@ if [ -n "${INPUT_CONFIG}" ]; then
     log info "Writing kube config."
     if [[ "${INPUT_CONFIG}" =~ ^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$ ]]; then
         log debug "Assuming provided kube config is encoded in base64."
-        echo "${INPUT_CONFIG}" | base64 -d > /tmp/config
+        echo "${INPUT_CONFIG}" | base64 -d > "${KUBECONFIG}"
     else
-        log debug "Assuming provided kube config is in plain text."
-        echo "${INPUT_CONFIG}" > /tmp/config
+        log debug "Assuming provided kube config is in plain text:"
+        echo "${INPUT_CONFIG}" > "${KUBECONFIG}"
+        
     fi
 elif [ -n "${INPUT_EKS_CLUSTER}" ]; then
     log info "Getting kube config for cluster ${INPUT_EKS_CLUSTER}"
