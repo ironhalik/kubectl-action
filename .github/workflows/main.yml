@@ -5,10 +5,6 @@ on:
     tags:
       - v*
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   test:
     name: Test
@@ -26,7 +22,7 @@ jobs:
   build:
     name: Build and scan
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
     steps:
@@ -56,7 +52,7 @@ jobs:
   push:
     name: Push image
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
