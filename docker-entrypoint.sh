@@ -14,8 +14,10 @@ log() {
 }
 
 if [ -n "${INPUT_DEBUG}" ] || [ -n "${DEBUG}" ] || [ -n "${RUNNER_DEBUG}" ]; then
+    # shellcheck disable=SC2034
     IS_DEBUG=1
 fi
+# shellcheck disable=SC2034
 IS_KUBECTL_ACTION_BASE=1
 # We support every input parameter as an env var
 CONFIG="${INPUT_CONFIG:-${CONFIG}}"
@@ -57,6 +59,6 @@ log debug "Current kubectl context: ${current_context}"
 if [ "$(ls -A /usr/local/bin/docker-entrypoint.d/)" ]; then
     for file in /usr/local/bin/docker-entrypoint.d/*; do
         # shellcheck source=/dev/null
-        source ${file}
+        source "${file}"
     done
 fi
