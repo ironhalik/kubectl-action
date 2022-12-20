@@ -7,9 +7,12 @@ on:
     tags:
       - v*
 
+env:
+  LOCAL_IMAGE: ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }}
+
 jobs:
   build:
-    name: Build docker image
+    name: Build Docker image
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -28,10 +31,10 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }}
+          tags: ${{ env.LOCAL_IMAGE }}
 
   test-shellcheck:
-    name: Run shellcheck
+    name: Run Shellcheck
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -56,11 +59,11 @@ jobs:
       - name: Login to ghcr.io
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
       - name: Pull current image
-        run: docker pull ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }}
+        run: docker pull ${{ env.LOCAL_IMAGE }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.8.0
         with:
-          image-ref: ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }}
+          image-ref: ${{ env.LOCAL_IMAGE }}
           exit-code: "1"
           ignore-unfixed: true
           vuln-type: "os,library"
@@ -69,12 +72,39 @@ jobs:
           security-checks: "vuln"
           hide-progress: true
 
+  test-bats:
+    name: Run Bats Tests
+    runs-on: ubuntu-22.04
+    needs:
+      - build
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Login to ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Pull current image
+        run: docker pull ${{ env.LOCAL_IMAGE }}
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Run bats tests
+        run: |
+          docker run --rm \
+            --volume ${PWD}/:/code/ \
+            --workdir /code/ \
+            --entrypoint "" \
+            ${{ env.LOCAL_IMAGE }} \
+            ./test/bats/bin/bats ./test/
+
   publish-tags:
-    name: Publish tagged image
+    name: Publish Dist Images
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - test-shellcheck
       - test-trivy
+      - test-bats
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -85,10 +115,10 @@ jobs:
       - name: Login to ghcr.io
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
       - name: Pull current image
-        run: docker pull ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }}
+        run: docker pull ${{ env.LOCAL_IMAGE }}
       - name: Tag and push images
         run: |
-          docker tag ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }} ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_REF_NAME }}
-          docker tag ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }} ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_SHA_SHORT }}
+          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_REF_NAME }}
+          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_SHA_SHORT }}
           docker push ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_REF_NAME }}
           docker push ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_SHA_SHORT }}

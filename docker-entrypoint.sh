@@ -25,7 +25,7 @@ if [ -n "${INPUT_CONFIG}" ]; then
         log debug "Assuming provided kube config is encoded in base64."
         echo "${INPUT_CONFIG}" | base64 -d > "${KUBECONFIG}"
     else
-        log debug "Assuming provided kube config is in plain text:"
+        log debug "Assuming provided kube config is in plain text."
         echo "${INPUT_CONFIG}" > "${KUBECONFIG}"
         
     fi
@@ -43,11 +43,15 @@ fi
 
 if [ -n "${INPUT_CONTEXT}" ]; then
     log info "Setting kubectl context to ${INPUT_CONTEXT}"
-    kubectl config set-context "${INPUT_CONTEXT}"
+    kubectl config use-context "${INPUT_CONTEXT}"
 fi
-log debug "Current kubectl context: $(kubectl config current-context)"
+
+current_context=$(kubectl config current-context)
+log debug "Current kubectl context: ${current_context}"
 
 if [ "$(ls -A /usr/local/bin/docker-entrypoint.d/)" ]; then
-    # shellcheck disable=SC1090
-    source /usr/local/bin/docker-entrypoint.d/*
+    for file in /usr/local/bin/docker-entrypoint.d/*; do
+        # shellcheck source=/dev/null
+        source ${file}
+    done
 fi
