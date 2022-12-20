@@ -35,13 +35,14 @@ users:
 
 teardown() {
     echo "" > /kubeconfig
+    rm -f /usr/local/bin/docker-entrypoint.d/*
 }
 
 
 @test "entrypoint is runnable" {
     run docker-entrypoint.sh
-    assert_failure
     assert_output --partial "Either config or eks_cluster must be specified"
+    assert_failure
 }
 
 
@@ -51,6 +52,7 @@ teardown() {
     run docker-entrypoint.sh
     assert_output --partial "Assuming provided kube config is encoded in base64"
     assert_output --partial "Current kubectl context: dev-context"
+    assert_success
 }
 
 
@@ -60,6 +62,7 @@ teardown() {
     run docker-entrypoint.sh
     assert_output --partial "Assuming provided kube config is in plain text"
     assert_output --partial "Current kubectl context: dev-context"
+    assert_success
 }
 
 
@@ -71,6 +74,7 @@ teardown() {
     assert_output --partial "Getting kube config for cluster somecluster-dev"
     assert_output --partial "Unable to locate credentials"
     assert_output --partial "error: current-context is not set"
+    assert_failure
 }
 
 
@@ -80,6 +84,7 @@ teardown() {
     
     run docker-entrypoint.sh
     assert_output --partial "Current kubectl context: the-other-context"
+    assert_success
 }
 
 
@@ -102,6 +107,5 @@ teardown() {
     run docker-entrypoint.sh
     assert_output --partial "Hello!"
     assert_output --partial "World!"
-
-    rm /usr/local/bin/docker-entrypoint.d/*
+    assert_success
 }
