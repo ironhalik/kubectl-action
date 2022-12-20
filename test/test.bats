@@ -98,6 +98,16 @@ teardown() {
 }
 
 
+@test "provided namespace is being set" {
+    export INPUT_CONFIG="${BASE64_CONFIG}"
+    export INPUT_NAMESPACE="some-namespace"
+    
+    run docker-entrypoint.sh
+    assert_output --partial "Current kubectl namespace: some-namespace"
+    assert_success
+}
+
+
 @test "docker-entrypoint.d scripts are loaded" {
     export INPUT_CONFIG="${BASE64_CONFIG}"
 

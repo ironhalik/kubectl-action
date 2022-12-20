@@ -24,6 +24,7 @@ CONFIG="${INPUT_CONFIG:-${CONFIG}}"
 EKS_CLUSTER="${INPUT_EKS_CLUSTER:-${EKS_CLUSTER}}"
 EKS_ROLE_ARN="${INPUT_EKS_ROLE_ARN:-${EKS_ROLE_ARN}}"
 CONTEXT="${INPUT_CONTEXT:-${CONTEXT}}"
+NAMESPACE="${INPUT_NAMESPACE:-${NAMESPACE}}"
 
 # Prepare kubeconfig
 if [ -n "${CONFIG}" ]; then
@@ -52,9 +53,15 @@ if [ -n "${CONTEXT}" ]; then
     log info "Setting kubectl context to ${CONTEXT}"
     kubectl config use-context "${CONTEXT}"
 fi
-
 current_context=$(kubectl config current-context)
 log debug "Current kubectl context: ${current_context}"
+
+if [ -n "${NAMESPACE}" ]; then
+    log info "Setting namespace to ${NAMESPACE}"
+    kubectl config set-context --current --namespace "${NAMESPACE}"
+fi
+current_namespace=$(kubectl config view --minify -o jsonpath='{..namespace}')
+log debug "Current kubectl namespace: ${current_namespace}"
 
 if [ "$(ls -A /usr/local/bin/docker-entrypoint.d/)" ]; then
     for file in /usr/local/bin/docker-entrypoint.d/*; do

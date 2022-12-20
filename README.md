@@ -9,6 +9,7 @@ The expected inputs are:
 - `eks_cluster` The name of the EKS cluster to get config for. Will use AWS CLI to generate a valid config. Will need standard `aws-cli` env vars and eks:DescribeCluster permission. Mutually exclusive with `config`.
 - `context` kubectl config context to use. Not needed if the config has a context already selected.
 - `eks_role_arn` IAM role ARN that should be assumed by `aws-cli` when interacting with EKS cluster.
+- `namespace` kubectl namespace to use. Same behaviour as in kubectl.
 
 Once the basic inputs are set, any kubectl dependent tools will have a config available.
 
@@ -30,6 +31,9 @@ inputs:
     required: false
   context:
     description: "Context to use if there are multiple."
+    required: false
+  namespace:
+    description: "Namespace to use."
     required: false
 ```
 
