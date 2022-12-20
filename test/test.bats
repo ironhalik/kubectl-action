@@ -3,7 +3,7 @@ setup() {
     load 'lib/bats-assert/load'
 
     export INPUT_DEBUG=true
-    export BASE64_CONFIG="YXBpVmVyc2lvbjogdjEKY2x1c3RlcnM6Ci0gY2x1c3RlcjoKICAgIHNlcnZlcjogaHR0cDovL2V4YW1wbGUuY29tCiAgbmFtZTogdGVzdC1jbHVzdGVyCmNvbnRleHRzOgotIGNvbnRleHQ6CiAgICBjbHVzdGVyOiB0ZXN0LWNsdXN0ZXIKICAgIG5hbWVzcGFjZTogZGVmYXVsdAogICAgdXNlcjogdGVzdC11c2VyCiAgbmFtZTogdGVzdC1jb250ZXh0Ci0gY29udGV4dDoKICAgIGNsdXN0ZXI6ICIiCiAgICB1c2VyOiAiIgogIG5hbWU6IHRoZS1vdGhlci1jb250ZXh0CmN1cnJlbnQtY29udGV4dDogZGV2LWNvbnRleHQKa2luZDogQ29uZmlnCnByZWZlcmVuY2VzOiB7fQp1c2VyczoKLSBuYW1lOiB0ZXN0LXVzZXIKICB1c2VyOgogICAgdG9rZW46IHRlc3QtdG9rZW4="
+    export BASE64_CONFIG="YXBpVmVyc2lvbjogdjEKY2x1c3RlcnM6Ci0gY2x1c3RlcjoKICAgIHNlcnZlcjogaHR0cDovL2V4YW1wbGUuY29tCiAgbmFtZTogdGVzdC1jbHVzdGVyCmNvbnRleHRzOgotIGNvbnRleHQ6CiAgICBjbHVzdGVyOiB0ZXN0LWNsdXN0ZXIKICAgIG5hbWVzcGFjZTogZGVmYXVsdAogICAgdXNlcjogdGVzdC11c2VyCiAgbmFtZTogdGVzdC1jb250ZXh0Ci0gY29udGV4dDoKICAgIGNsdXN0ZXI6ICIiCiAgICB1c2VyOiAiIgogIG5hbWU6IHRoZS1vdGhlci1jb250ZXh0CmN1cnJlbnQtY29udGV4dDogdGVzdC1jb250ZXh0CmtpbmQ6IENvbmZpZwpwcmVmZXJlbmNlczoge30KdXNlcnM6Ci0gbmFtZTogdGVzdC11c2VyCiAgdXNlcjoKICAgIHRva2VuOiB0ZXN0LXRva2VuCg=="
     export PLAIN_CONFIG="
 apiVersion: v1
 clusters:
@@ -20,7 +20,7 @@ contexts:
     cluster: ""
     user: ""
   name: the-other-context
-current-context: dev-context
+current-context: test-context
 kind: Config
 preferences: {}
 users:
@@ -51,7 +51,7 @@ teardown() {
 
     run docker-entrypoint.sh
     assert_output --partial "Assuming provided kube config is encoded in base64"
-    assert_output --partial "Current kubectl context: dev-context"
+    assert_output --partial "Current kubectl context: test-context"
     assert_success
 }
 
@@ -61,7 +61,7 @@ teardown() {
 
     run docker-entrypoint.sh
     assert_output --partial "Assuming provided kube config is in plain text"
-    assert_output --partial "Current kubectl context: dev-context"
+    assert_output --partial "Current kubectl context: test-context"
     assert_success
 }
 
@@ -107,5 +107,26 @@ teardown() {
     run docker-entrypoint.sh
     assert_output --partial "Hello!"
     assert_output --partial "World!"
+    assert_success
+}
+
+
+@test "base64 config is parsed (using env var)" {
+    export CONFIG="${BASE64_CONFIG}"
+
+    run docker-entrypoint.sh
+    assert_output --partial "Assuming provided kube config is encoded in base64"
+    assert_output --partial "Current kubectl context: test-context"
+    assert_success
+}
+
+
+@test "input parsing order is correct" {
+    export INPUT_CONFIG="${BASE64_CONFIG}"
+    export CONFIG="gibberish-that-doesnt-matter-because-input-config-takes-precedence"
+
+    run docker-entrypoint.sh
+    assert_output --partial "Assuming provided kube config is encoded in base64"
+    assert_output --partial "Current kubectl context: test-context"
     assert_success
 }
