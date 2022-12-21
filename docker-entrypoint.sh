@@ -13,6 +13,9 @@ log() {
     fi
 }
 
+
+# Prepare inputs
+# RUNNER_DEBUG is set by GHA when a rerun with debug is used
 if [ -n "${INPUT_DEBUG}" ] || [ -n "${DEBUG}" ] || [ -n "${RUNNER_DEBUG}" ]; then
     # shellcheck disable=SC2034
     IS_DEBUG=1
@@ -25,6 +28,7 @@ EKS_CLUSTER="${INPUT_EKS_CLUSTER:-${EKS_CLUSTER}}"
 EKS_ROLE_ARN="${INPUT_EKS_ROLE_ARN:-${EKS_ROLE_ARN}}"
 CONTEXT="${INPUT_CONTEXT:-${CONTEXT}}"
 NAMESPACE="${INPUT_NAMESPACE:-${NAMESPACE}}"
+
 
 # Prepare kubeconfig
 if [ -n "${CONFIG}" ]; then
@@ -40,13 +44,13 @@ if [ -n "${CONFIG}" ]; then
 elif [ -n "${EKS_CLUSTER}" ]; then
     if [ -n "${EKS_ROLE_ARN}" ]; then
         log info "Getting kube config for cluster ${EKS_CLUSTER} using role ${EKS_ROLE_ARN}"
-        log debug "$(aws eks update-kubeconfig --name "${EKS_CLUSTER}" --role-arn "${EKS_ROLE_ARN}")"
+        log debug "$(aws eks update-kubeconfig --name ${EKS_CLUSTER} --role-arn ${EKS_ROLE_ARN})"
     else
         log info "Getting kube config for cluster ${EKS_CLUSTER}"
-        log debug "$(aws eks update-kubeconfig --name "${EKS_CLUSTER}")"
+        log debug "$(aws eks update-kubeconfig --name ${EKS_CLUSTER})"
     fi
 else
-    echo "::error:: Either config or eks_cluster must be specified."
+    log error "Either config or eks_cluster must be specified."
     exit 2
 fi
 
@@ -54,14 +58,14 @@ if [ -n "${CONTEXT}" ]; then
     log info "Setting kubectl context to ${CONTEXT}"
     kubectl config use-context "${CONTEXT}"
 fi
-current_context=$(kubectl config current-context)
+current_context="$(kubectl config current-context)"
 log debug "Current kubectl context: ${current_context}"
 
 if [ -n "${NAMESPACE}" ]; then
     log info "Setting namespace to ${NAMESPACE}"
     kubectl config set-context --current --namespace "${NAMESPACE}"
 fi
-current_namespace=$(kubectl config view --minify -o jsonpath='{..namespace}')
+current_namespace="$(kubectl config view --minify -o jsonpath='{..namespace}')"
 log debug "Current kubectl namespace: ${current_namespace}"
 
 if [ "$(ls -A /usr/local/bin/docker-entrypoint.d/)" ]; then
