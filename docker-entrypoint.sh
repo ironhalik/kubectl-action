@@ -32,14 +32,13 @@ NAMESPACE="${INPUT_NAMESPACE:-${NAMESPACE}}"
 
 # Prepare kubeconfig
 if [ -n "${CONFIG}" ]; then
-    log info "Writing kube config."
+    log info "Writing kube config to ${KUBECONFIG}."
     if [[ "${CONFIG}" =~ ^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$ ]]; then
         log debug "Assuming provided kube config is encoded in base64."
         echo "${CONFIG}" | base64 -d > "${KUBECONFIG}"
     else
         log debug "Assuming provided kube config is in plain text."
         echo "${CONFIG}" > "${KUBECONFIG}"
-        
     fi
 elif [ -n "${EKS_CLUSTER}" ]; then
     if [ -n "${EKS_ROLE_ARN}" ]; then
@@ -53,6 +52,8 @@ else
     log error "Either config or eks_cluster must be specified."
     exit 2
 fi
+log debug "${KUBECONFIG} contents:"
+log debug "$(cat ${KUBECONFIG})"
 
 if [ -n "${CONTEXT}" ]; then
     log info "Setting kubectl context to ${CONTEXT}"

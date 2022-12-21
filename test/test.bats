@@ -51,6 +51,8 @@ teardown() {
 
     run docker-entrypoint.sh
     assert_output --partial "Assuming provided kube config is encoded in base64"
+    assert_output --partial "apiVersion: v1"
+    assert_output --partial "kind: Config"
     assert_output --partial "Current kubectl context: test-context"
     assert_success
 }
@@ -61,6 +63,8 @@ teardown() {
 
     run docker-entrypoint.sh
     assert_output --partial "Assuming provided kube config is in plain text"
+    assert_output --partial "apiVersion: v1"
+    assert_output --partial "kind: Config"
     assert_output --partial "Current kubectl context: test-context"
     assert_success
 }
