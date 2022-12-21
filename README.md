@@ -11,9 +11,11 @@ The expected inputs are:
 - `eks_role_arn` IAM role ARN that should be assumed by `aws-cli` when interacting with EKS cluster.
 - `namespace` kubectl namespace to use. Same behaviour as in kubectl.
 
+All inputs can be provided using environment variables (as capitalized input name, eg. eks_cluster would be EKS_CLUSTER).
+
 Once the basic inputs are set, any kubectl dependent tools will have a config available.
 
-If extending this base action, you'll need to add the following inputs to your action.yml
+When extending this base action, you'll need to add the following inputs to your action.yml
 ```
 inputs:
   # Inputs from kubectl-action-base
