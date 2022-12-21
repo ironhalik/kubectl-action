@@ -1,3 +1,4 @@
+# shellcheck disable=SC2030,SC2031
 setup() {
     load 'lib/bats-support/load'
     load 'lib/bats-assert/load'
@@ -29,7 +30,7 @@ users:
     token: test-token
 "
 
-    DIR="$(cd "$( dirname ${BATS_TEST_FILENAME} )" > /dev/null 2>&1 && pwd)"
+    DIR="$(cd "$( dirname "${BATS_TEST_FILENAME}" )" > /dev/null 2>&1 && pwd)"
     PATH="${DIR}/../:${PATH}"
 }
 

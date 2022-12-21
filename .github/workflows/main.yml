@@ -45,7 +45,6 @@ jobs:
         uses: ludeeus/action-shellcheck@1.1.0
         with:
           ignore: Dockerfile test/lib/
-          severity: warning
 
   test-trivy:
     name: Run Trivy

@@ -43,17 +43,17 @@ if [ -n "${CONFIG}" ]; then
 elif [ -n "${EKS_CLUSTER}" ]; then
     if [ -n "${EKS_ROLE_ARN}" ]; then
         log info "Getting kube config for cluster ${EKS_CLUSTER} using role ${EKS_ROLE_ARN}"
-        log debug "$(aws eks update-kubeconfig --name ${EKS_CLUSTER} --role-arn ${EKS_ROLE_ARN})"
+        log debug "$(aws eks update-kubeconfig --name "${EKS_CLUSTER}" --role-arn "${EKS_ROLE_ARN}")"
     else
         log info "Getting kube config for cluster ${EKS_CLUSTER}"
-        log debug "$(aws eks update-kubeconfig --name ${EKS_CLUSTER})"
+        log debug "$(aws eks update-kubeconfig --name "${EKS_CLUSTER}")"
     fi
 else
     log error "Either config or eks_cluster must be specified."
     exit 2
 fi
 log debug "${KUBECONFIG} contents:"
-log debug "$(cat ${KUBECONFIG})"
+log debug "$(cat "${KUBECONFIG}")"
 
 if [ -n "${CONTEXT}" ]; then
     log info "Setting kubectl context to ${CONTEXT}"
