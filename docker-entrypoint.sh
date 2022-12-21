@@ -1,8 +1,31 @@
 #!/bin/bash
+# shellcheck disable=SC2034
 set -eo pipefail
 
+# This ninja function "simplifies" input parsing in GHA context.
+# It takes in a list of inputs, and as a result sets the value of the input
+# whether the input was provided using an environment variable (SOME_VAR),
+# or using GHA with statement (INPUT_SOME_VAR).
+#   $ export INPUT_VAR_ONE=value-one # Passed from GHA with
+#   $ export VAR_TWO=value-two       # typical env var
+#   $ get_inputs var_one var_two
+#   $ echo $var_one
+#   value-one
+#   $ echo $var_two
+#   value-two
+# GHA with statement takes precedence over env vars.
+get_inputs() {
+    local input
+    # shellcheck disable=SC2048
+    for input in ${*}; do
+        local env_var="${input^^}"
+        local with_var="INPUT_${input^^}"
+        eval "${input}"="\"${!with_var:-${!env_var}}\""
+    done
+}
+
 # Logging function
-# log [level] [msg] [msg]
+# log [level] [msg]
 log() {
     local log_level="${1}"
     shift
@@ -14,20 +37,11 @@ log() {
 }
 
 
-# Prepare inputs
-# RUNNER_DEBUG is set by GHA when a rerun with debug is used
-if [ -n "${INPUT_DEBUG}" ] || [ -n "${DEBUG}" ] || [ -n "${RUNNER_DEBUG}" ]; then
-    # shellcheck disable=SC2034
-    IS_DEBUG=1
-fi
-# shellcheck disable=SC2034
+get_inputs DEBUG CONFIG EKS_CLUSTER EKS_ROLE_ARN CONTEXT NAMESPACE
 IS_KUBECTL_ACTION_BASE=1
-# We support every input parameter as an env var
-CONFIG="${INPUT_CONFIG:-${CONFIG}}"
-EKS_CLUSTER="${INPUT_EKS_CLUSTER:-${EKS_CLUSTER}}"
-EKS_ROLE_ARN="${INPUT_EKS_ROLE_ARN:-${EKS_ROLE_ARN}}"
-CONTEXT="${INPUT_CONTEXT:-${CONTEXT}}"
-NAMESPACE="${INPUT_NAMESPACE:-${NAMESPACE}}"
+if [ -n "${DEBUG}" ] || [ -n "${RUNNER_DEBUG}" ]; then
+    export IS_DEBUG=1
+fi
 
 
 # Prepare kubeconfig
