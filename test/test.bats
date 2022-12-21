@@ -72,8 +72,19 @@ teardown() {
 
     run docker-entrypoint.sh
     assert_output --partial "Getting kube config for cluster somecluster-dev"
+    refute_output --partial "using role"
     assert_output --partial "Unable to locate credentials"
-    assert_output --partial "error: current-context is not set"
+    assert_failure
+}
+
+@test "eks_cluster config and role_arn are being used" {
+    export INPUT_EKS_CLUSTER="somecluster-dev"
+    export INPUT_EKS_ROLE_ARN="arn:aws:iam::123456789012:role/Test"
+    export AWS_DEFAULT_REGION=eu-west-1
+
+    run docker-entrypoint.sh
+    assert_output --partial "Getting kube config for cluster somecluster-dev using role arn:aws:iam::123456789012:role/Test"
+    assert_output --partial "Unable to locate credentials"
     assert_failure
 }
 

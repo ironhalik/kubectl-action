@@ -38,10 +38,11 @@ if [ -n "${CONFIG}" ]; then
         
     fi
 elif [ -n "${EKS_CLUSTER}" ]; then
-    log info "Getting kube config for cluster ${EKS_CLUSTER}"
-    if [ -n "${EKS_CLUSTER}" ]; then
-        log debug "$(aws eks update-kubeconfig --name "${EKS_CLUSTER}" --role-arn "${EKS_CLUSTER}")"
+    if [ -n "${EKS_ROLE_ARN}" ]; then
+        log info "Getting kube config for cluster ${EKS_CLUSTER} using role ${EKS_ROLE_ARN}"
+        log debug "$(aws eks update-kubeconfig --name "${EKS_CLUSTER}" --role-arn "${EKS_ROLE_ARN}")"
     else
+        log info "Getting kube config for cluster ${EKS_CLUSTER}"
         log debug "$(aws eks update-kubeconfig --name "${EKS_CLUSTER}")"
     fi
 else
