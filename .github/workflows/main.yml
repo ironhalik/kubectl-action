@@ -8,7 +8,7 @@ on:
       - v*
 
 env:
-  LOCAL_IMAGE: ghcr.io/ironhalik/kubectl-action-base:${{ github.sha }}
+  LOCAL_IMAGE: ghcr.io/ironhalik/kubectl-action:${{ github.sha }}
 
 jobs:
   build:
@@ -117,7 +117,7 @@ jobs:
         run: docker pull ${{ env.LOCAL_IMAGE }}
       - name: Tag and push images
         run: |
-          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_REF_NAME }}
-          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_SHA_SHORT }}
-          docker push ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_REF_NAME }}
-          docker push ghcr.io/ironhalik/kubectl-action-base:${{ env.CI_SHA_SHORT }}
+          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action:${{ env.CI_REF_NAME }}
+          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action:${{ env.CI_SHA_SHORT }}
+          docker push ghcr.io/ironhalik/kubectl-action:${{ env.CI_REF_NAME }}
+          docker push ghcr.io/ironhalik/kubectl-action:${{ env.CI_SHA_SHORT }}

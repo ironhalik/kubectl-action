@@ -37,7 +37,7 @@ log() {
 }
 
 
-get_inputs DEBUG CONFIG EKS_CLUSTER EKS_ROLE_ARN CONTEXT NAMESPACE
+get_inputs DEBUG CONFIG EKS_CLUSTER EKS_ROLE_ARN CONTEXT NAMESPACE RUN
 IS_KUBECTL_ACTION_BASE=1
 if [ -n "${DEBUG}" ] || [ -n "${RUNNER_DEBUG}" ]; then
     export IS_DEBUG=1
@@ -83,8 +83,13 @@ fi
 current_namespace="$(kubectl config view --minify -o jsonpath='{..namespace}')"
 log debug "Current kubectl namespace: ${current_namespace}"
 
-if [ "$(ls -A /usr/local/bin/docker-entrypoint.d/)" ]; then
-    for file in /usr/local/bin/docker-entrypoint.d/*; do
+echo "${RUN}" | awk 'NF' | while read -r line; do
+  log debug "Running ${line}"
+  eval "${line}"
+done
+
+if [ "$(ls -A /usr/local/bin/kubectl-action.d/)" ]; then
+    for file in /usr/local/bin/kubectl-action.d/*; do
         # shellcheck source=/dev/null
         source "${file}"
     done

@@ -36,12 +36,12 @@ users:
 
 teardown() {
     echo "" > /kubeconfig
-    rm -f /usr/local/bin/docker-entrypoint.d/*
+    rm -f /usr/local/bin/kubectl-action.d/*
 }
 
 
 @test "entrypoint is runnable" {
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Either config or eks_cluster must be specified"
     assert_failure
 }
@@ -50,7 +50,7 @@ teardown() {
 @test "base64 config is parsed" {
     export INPUT_CONFIG="${BASE64_CONFIG}"
 
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Assuming provided kube config is encoded in base64"
     assert_output --partial "apiVersion: v1"
     assert_output --partial "kind: Config"
@@ -62,7 +62,7 @@ teardown() {
 @test "plain text config is parsed" {
     export INPUT_CONFIG="${PLAIN_CONFIG}"
 
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Assuming provided kube config is in plain text"
     assert_output --partial "apiVersion: v1"
     assert_output --partial "kind: Config"
@@ -75,7 +75,7 @@ teardown() {
     export INPUT_EKS_CLUSTER="somecluster-dev"
     export AWS_DEFAULT_REGION=eu-west-1
 
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Getting kube config for cluster somecluster-dev"
     refute_output --partial "using role"
     assert_output --partial "Unable to locate credentials"
@@ -87,7 +87,7 @@ teardown() {
     export INPUT_EKS_ROLE_ARN="arn:aws:iam::123456789012:role/Test"
     export AWS_DEFAULT_REGION=eu-west-1
 
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Getting kube config for cluster somecluster-dev using role arn:aws:iam::123456789012:role/Test"
     assert_output --partial "Unable to locate credentials"
     assert_failure
@@ -98,7 +98,7 @@ teardown() {
     export INPUT_CONFIG="${BASE64_CONFIG}"
     export INPUT_CONTEXT="the-other-context"
     
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Current kubectl context: the-other-context"
     assert_success
 }
@@ -108,7 +108,7 @@ teardown() {
     export INPUT_CONFIG="${BASE64_CONFIG}"
     export INPUT_CONTEXT="fake-context"
     
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "error: no context exists with the name"
     assert_failure
 }
@@ -118,19 +118,19 @@ teardown() {
     export INPUT_CONFIG="${BASE64_CONFIG}"
     export INPUT_NAMESPACE="some-namespace"
     
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Current kubectl namespace: some-namespace"
     assert_success
 }
 
 
-@test "docker-entrypoint.d scripts are loaded" {
+@test "kubectl-action.d scripts are loaded" {
     export INPUT_CONFIG="${BASE64_CONFIG}"
 
-    echo "echo Hello!" > /usr/local/bin/docker-entrypoint.d/00_hello
-    echo "echo World!" > /usr/local/bin/docker-entrypoint.d/10_world
+    echo "echo Hello!" > /usr/local/bin/kubectl-action.d/00_hello
+    echo "echo World!" > /usr/local/bin/kubectl-action.d/10_world
     
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Hello!"
     assert_output --partial "World!"
     assert_success
@@ -140,7 +140,7 @@ teardown() {
 @test "base64 config is parsed (using env var)" {
     export CONFIG="${BASE64_CONFIG}"
 
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Assuming provided kube config is encoded in base64"
     assert_output --partial "Current kubectl context: test-context"
     assert_success
@@ -151,8 +151,45 @@ teardown() {
     export INPUT_CONFIG="${BASE64_CONFIG}"
     export CONFIG="gibberish-that-doesnt-matter-because-input-config-takes-precedence"
 
-    run docker-entrypoint.sh
+    run kubectl-action.sh
     assert_output --partial "Assuming provided kube config is encoded in base64"
     assert_output --partial "Current kubectl context: test-context"
+    assert_success
+}
+
+@test "commands are being executed" {
+    export INPUT_CONFIG="${BASE64_CONFIG}"
+    export INPUT_RUN="echo some command"
+
+    run kubectl-action.sh
+    assert_output --partial "some command"
+    assert_success
+}
+
+@test "commands are being executed (using env var)" {
+    export INPUT_CONFIG="${BASE64_CONFIG}"
+    export RUN="echo some command provided with env vars"
+
+    run kubectl-action.sh
+    assert_output --partial "some command provided with env vars"
+    assert_success
+}
+
+@test "multiline commands are parsed and executed" {
+    export INPUT_CONFIG="${BASE64_CONFIG}"
+    export RUN="
+echo line number one
+echo line number two
+cat /some-file
+"
+
+    echo some-file-contents > /some-file
+
+    run kubectl-action.sh
+    assert_output --partial "Running echo line number one"
+    assert_output --partial "line number one"
+    assert_output --partial "Running echo line number two"
+    assert_output --partial "line number two"
+    assert_output --partial "some-file-contents"
     assert_success
 }

@@ -33,7 +33,7 @@ RUN apk add --no-cache \
     rm -rf /tmp/* &&\
     touch "${KUBECONFIG}" &&\
     chmod 600 "${KUBECONFIG}" &&\
-    mkdir -p /usr/local/bin/docker-entrypoint.d/
+    mkdir -p /usr/local/bin/kubectl-action.d/
 
-COPY docker-entrypoint.sh /usr/local/bin/
-ENTRYPOINT ["docker-entrypoint.sh"]
+COPY kubectl-action.sh /usr/local/bin/
+ENTRYPOINT ["kubectl-action.sh"]
