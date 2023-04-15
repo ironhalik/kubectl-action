@@ -28,6 +28,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -111,13 +112,18 @@ jobs:
     steps:
       - name: Export extra envs
         uses: FranzDiebold/github-env-vars-action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Prepare docker buildx
+        uses: docker/setup-buildx-action@v2
       - name: Login to ghcr.io
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-      - name: Pull current image
-        run: docker pull ${{ env.LOCAL_IMAGE }}
-      - name: Tag and push images
-        run: |
-          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action:${{ env.CI_REF_NAME }}
-          docker tag ${{ env.LOCAL_IMAGE }} ghcr.io/ironhalik/kubectl-action:${{ env.CI_SHA_SHORT }}
-          docker push ghcr.io/ironhalik/kubectl-action:${{ env.CI_REF_NAME }}
-          docker push ghcr.io/ironhalik/kubectl-action:${{ env.CI_SHA_SHORT }}
+      - name: Build Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ghcr.io/ironhalik/kubectl-action:${{ env.CI_REF_NAME }},ghcr.io/ironhalik/kubectl-action:${{ env.CI_SHA_SHORT }}
