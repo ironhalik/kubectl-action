@@ -1,10 +1,14 @@
-FROM alpine:3.16@sha256:bc41182d7ef5ffc53a40b044e725193bc10142a1243f395ee852a8d9730fc2ad
+FROM alpine:3.17@sha256:124c7d2707904eea7431fffe91522a01e5a861a624ee31d03372cc1d138a3126
 
 LABEL author="Michał Weinert <michal@weinert.io>"
 
 ARG TARGETARCH
 
-RUN apk add --no-cache bash=~5.1
+RUN apk add --no-cache \
+    "bash=~5.2" \
+    'yq=~4.30' \
+    'aws-cli=~1.25'
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV helm_version=3.10.0
@@ -27,14 +31,7 @@ LABEL stern-version="v${stern_version}"
 
 ENV KUBECONFIG=/kubeconfig
 
-RUN apk add --no-cache \
-    'libssl1.1=~1.1.1t' \
-    'libcrypto1.1=~1.1.1t' \
-    'yq=~4.25' \
-    'py3-pip=~22.1' &&\
-    pip install --no-cache --disable-pip-version-check --no-input --root-user-action ignore --progress-bar off \
-    'awscli>=1.25' &&\
-    wget -q "https://get.helm.sh/helm-v${helm_version}-linux-${TARGETARCH}.tar.gz" -O - | tar xzf - -C /tmp/ --strip-components=1 linux-${TARGETARCH}/helm &&\
+RUN wget -q "https://get.helm.sh/helm-v${helm_version}-linux-${TARGETARCH}.tar.gz" -O - | tar xzf - -C /tmp/ --strip-components=1 linux-${TARGETARCH}/helm &&\
     wget -q "https://storage.googleapis.com/kubernetes-release/release/v${kubectl_version}/bin/linux/${TARGETARCH}/kubectl" -O /tmp/kubectl &&\
     wget -q "https://github.com/stern/stern/releases/download/v${stern_version}/stern_${stern_version}_linux_${TARGETARCH}.tar.gz" -O - | tar xzf - -C /tmp/  &&\
     sha256sum /tmp/helm | grep -q "${!helm_checksum}" &&\
@@ -46,6 +43,9 @@ RUN apk add --no-cache \
     touch "${KUBECONFIG}" &&\
     chmod 600 "${KUBECONFIG}" &&\
     mkdir -p /usr/local/bin/kubectl-action.d/
+
+COPY kubectl-action.sh /usr/local/bin/
+ENTRYPOINT ["kubectl-action.sh"]
 
 COPY kubectl-action.sh /usr/local/bin/
 ENTRYPOINT ["kubectl-action.sh"]
