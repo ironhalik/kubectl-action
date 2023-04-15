@@ -11,21 +11,21 @@ RUN apk add --no-cache \
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ENV helm_version=3.10.0
-ENV helm_checksum_amd64=bc102ba0c9d5fba18b520fbedf63d114e47426a6b6aa0337ecab4a327704d6ab
-ENV helm_checksum_arm64=3d37439910b7140cc078eba6c34979321ec3c020db54f30a8a86a0d9e92bac85
+ENV helm_version=3.11.3
+ENV helm_checksum_amd64=1f4c31531e5b077e2b5d44016908eeef970eb4540b3bfe8a0fc78e1a933df1c0
+ENV helm_checksum_arm64=bd5e3e6733ed58e6448619ce9baad6a95be20123b74ab8510bb0e4b484988407
 ENV helm_checksum="helm_checksum_${TARGETARCH}"
 LABEL helm-version="v${helm_version}"
 
-ENV kubectl_version=1.25.2
-ENV kubectl_checksum_amd64=8639f2b9c33d38910d706171ce3d25be9b19fc139d0e3d4627f38ce84f9040eb
-ENV kubectl_checksum_arm64=b26aa656194545699471278ad899a90b1ea9408d35f6c65e3a46831b9c063fd5
+ENV kubectl_version=1.27.1
+ENV kubectl_checksum_amd64=7fe3a762d926fb068bae32c399880e946e8caf3d903078bea9b169dcd5c17f6d
+ENV kubectl_checksum_arm64=fd3cb8f16e6ed8aee9955b76e3027ac423b6d1cc7356867310d128082e2db916
 ENV kubectl_checksum="kubectl_checksum_${TARGETARCH}"
 LABEL kubectl-version="v${kubectl_version}"
 
-ENV stern_version=1.22.0
-ENV stern_checksum_amd64=cecafc0110310118fb77c0d9bcc7af8852fe4cfd8252d096b070c647b70d1cd9
-ENV stern_checksum_arm64=478d25e974539d515eb2a365c7f8cdf50645015529910d9e4e550f9e01d2c1e6
+ENV stern_version=1.25.0
+ENV stern_checksum_amd64=1a89589da2694fadcec2e002ca6e38a3a5eab2096bbdd1c46a551b9f416bc75a
+ENV stern_checksum_arm64=b76e32863cff4b15c23382a777a7e3763a688916a441c9cb2de04624673ab379
 ENV stern_checksum="stern_checksum_${TARGETARCH}"
 LABEL stern-version="v${stern_version}"
 
