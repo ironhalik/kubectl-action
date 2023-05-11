@@ -20,7 +20,7 @@ get_inputs() {
     for input in ${*}; do
         local env_var="${input^^}"
         local with_var="INPUT_${input^^}"
-        eval export "${input}"="\"${!with_var:-${!env_var}}\""
+        export "${input}"="${!with_var:-${!env_var}}"
     done
 }
 
