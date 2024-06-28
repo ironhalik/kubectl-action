@@ -1,0 +1,36 @@
+---
+name: "Periodic scan"
+
+on:
+  schedule:
+    - cron: "00 00 * * 1"
+  workflow_dispatch:
+
+env:
+  LOCAL_IMAGE: ghcr.io/ironhalik/kubectl-action:${{ github.sha }}
+
+jobs:
+  test-trivy:
+    name: Run Trivy
+    runs-on: ubuntu-22.04
+    needs:
+      - build
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Login to ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Pull current image
+        run: docker pull ${{ env.LOCAL_IMAGE }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.23.0
+        with:
+          image-ref: ${{ env.LOCAL_IMAGE }}
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "HIGH,CRITICAL"
+          skip-dirs: /usr/local/bin/
+          scanners: "vuln"
+          hide-progress: true
