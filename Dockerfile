@@ -1,4 +1,4 @@
-FROM alpine:3.17@sha256:124c7d2707904eea7431fffe91522a01e5a861a624ee31d03372cc1d138a3126
+FROM alpine:3.20@sha256:b89d9c93e9ed3597455c90a0b88a8bbb5cb7188438f70953fede212a0c4394e0
 
 LABEL author="Michał Weinert <michal@weinert.io>"
 
@@ -6,26 +6,26 @@ ARG TARGETARCH
 
 RUN apk add --no-cache \
     "bash=~5.2" \
-    'yq=~4.30' \
-    'aws-cli=~1.25'
+    'yq=~4.44' \
+    'aws-cli=~2.15'
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ENV helm_version=3.11.3
-ENV helm_checksum_amd64=1f4c31531e5b077e2b5d44016908eeef970eb4540b3bfe8a0fc78e1a933df1c0
-ENV helm_checksum_arm64=bd5e3e6733ed58e6448619ce9baad6a95be20123b74ab8510bb0e4b484988407
+ENV helm_version=3.15.2
+ENV helm_checksum_amd64=2dc819262ef5a362134322de223b9f39d42a2f2164b8ee62e3613a2a83b31e72
+ENV helm_checksum_arm64=5e5e3b098aa808055ab6703112269c5a3891d37aaa945bc423554503985d2e74
 ENV helm_checksum="helm_checksum_${TARGETARCH}"
 LABEL helm-version="v${helm_version}"
 
-ENV kubectl_version=1.27.1
-ENV kubectl_checksum_amd64=7fe3a762d926fb068bae32c399880e946e8caf3d903078bea9b169dcd5c17f6d
-ENV kubectl_checksum_arm64=fd3cb8f16e6ed8aee9955b76e3027ac423b6d1cc7356867310d128082e2db916
+ENV kubectl_version=1.30.2
+ENV kubectl_checksum_amd64=c6e9c45ce3f82c90663e3c30db3b27c167e8b19d83ed4048b61c1013f6a7c66e
+ENV kubectl_checksum_arm64=56becf07105fbacd2b70f87f3f696cfbed226cb48d6d89ed7f65ba4acae3f2f8
 ENV kubectl_checksum="kubectl_checksum_${TARGETARCH}"
 LABEL kubectl-version="v${kubectl_version}"
 
-ENV stern_version=1.25.0
-ENV stern_checksum_amd64=1a89589da2694fadcec2e002ca6e38a3a5eab2096bbdd1c46a551b9f416bc75a
-ENV stern_checksum_arm64=b76e32863cff4b15c23382a777a7e3763a688916a441c9cb2de04624673ab379
+ENV stern_version=1.30.0
+ENV stern_checksum_amd64=74f26ef1422be8bd3539a9f1e6e0738bf2f03e6b096bc7acd314dbbfaecb5943
+ENV stern_checksum_arm64=fd1c721dda48e6d23f6f4cd3314e93ed7ecf62593ab4acdde6940b4dd9d7b568
 ENV stern_checksum="stern_checksum_${TARGETARCH}"
 LABEL stern-version="v${stern_version}"
 
@@ -43,9 +43,6 @@ RUN wget -q "https://get.helm.sh/helm-v${helm_version}-linux-${TARGETARCH}.tar.g
     touch "${KUBECONFIG}" &&\
     chmod 600 "${KUBECONFIG}" &&\
     mkdir -p /usr/local/bin/kubectl-action.d/
-
-COPY kubectl-action.sh /usr/local/bin/
-ENTRYPOINT ["kubectl-action.sh"]
 
 COPY kubectl-action.sh /usr/local/bin/
 ENTRYPOINT ["kubectl-action.sh"]
