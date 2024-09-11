@@ -7,7 +7,9 @@ ARG TARGETARCH
 RUN apk add --no-cache \
     "bash=~5.2" \
     'yq=~4.44' \
-    'aws-cli=~2.15'
+    'aws-cli=~2.15' \
+    # CVE-2024-45490 \
+    'libexpat>=2.6.3-r0'
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
