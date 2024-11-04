@@ -12,7 +12,7 @@ env:
 jobs:
   test-trivy:
     name: Run Trivy
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read
@@ -21,13 +21,14 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
       - name: Pull current image
         run: docker pull ${{ env.LOCAL_IMAGE }}
+      - name: Log out of ghcr.io
+        run: docker logout ghcr.io
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.23.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: ${{ env.LOCAL_IMAGE }}
           exit-code: "1"
           ignore-unfixed: true
-          vuln-type: "os,library"
           severity: "HIGH,CRITICAL"
           skip-dirs: /usr/local/bin/
           scanners: "vuln"
